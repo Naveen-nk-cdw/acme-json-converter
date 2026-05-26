@@ -1,35 +1,104 @@
-// @ts-check
-import eslint from '@eslint/js';
-import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
+import tsEslintPlugin from '@typescript-eslint/eslint-plugin';
 import globals from 'globals';
-import tseslint from 'typescript-eslint';
+import tsParser from '@typescript-eslint/parser';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import js from '@eslint/js';
+import { FlatCompat } from '@eslint/eslintrc';
 
-export default tseslint.config(
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const compat = new FlatCompat({
+  baseDirectory: __dirname,
+  recommendedConfig: js.configs.recommended,
+  allConfig: js.configs.all,
+});
+
+export default [
   {
-    ignores: ['eslint.config.mjs'],
+    ignores: ['dist', 'node_modules', 'coverage'],
   },
-  eslint.configs.recommended,
-  ...tseslint.configs.recommendedTypeChecked,
-  eslintPluginPrettierRecommended,
+  ...compat.extends('plugin:@typescript-eslint/recommended', 'plugin:prettier/recommended'),
   {
+    plugins: {
+      '@typescript-eslint': tsEslintPlugin,
+    },
     languageOptions: {
       globals: {
         ...globals.node,
         ...globals.jest,
       },
-      sourceType: 'commonjs',
+      parser: tsParser,
+      ecmaVersion: 'latest',
+      sourceType: 'module',
       parserOptions: {
-        projectService: true,
-        tsconfigRootDir: import.meta.dirname,
+        project: 'tsconfig.json',
+        tsconfigRootDir: __dirname,
       },
     },
-  },
-  {
     rules: {
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-floating-promises': 'warn',
-      '@typescript-eslint/no-unsafe-argument': 'warn',
-      "prettier/prettier": ["error", { endOfLine: "auto" }],
+      '@typescript-eslint/interface-name-prefix': 'off',
+
+      '@typescript-eslint/explicit-function-return-type': 'warn',
+
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
+
+      '@typescript-eslint/no-explicit-any': 'warn',
+
+      'no-unused-vars': 'off',
+
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
+
+      'no-empty-function': 'off',
+
+      '@typescript-eslint/no-empty-function': [
+        'error',
+        {
+          allow: ['constructors'],
+        },
+      ],
+
+      'require-await': 'off',
+
+      '@typescript-eslint/require-await': 'error',
+
+      '@typescript-eslint/no-floating-promises': 'error',
+
+      'max-len': [
+        'error',
+        {
+          code: 100,
+          tabWidth: 2,
+          ignoreUrls: true,
+          ignoreStrings: true,
+          ignoreTemplateLiterals: true,
+          ignoreComments: false,
+        },
+      ],
+
+      'no-restricted-syntax': [
+        'error',
+
+        {
+          selector:
+            'CallExpression[callee.object.name=configService][callee.property.name=/^(get|getOrThrow)$/]:not(:has([arguments.1] Property[key.name=infer][value.value=true])), CallExpression[callee.object.property.name=configService][callee.property.name=/^(get|getOrThrow)$/]:not(:has([arguments.1] Property[key.name=infer][value.value=true]))',
+
+          message:
+            'Add "{ infer: true }" to configService.get() for correct typechecking. Example: configService.get("database.port", { infer: true })',
+        },
+
+        {
+          selector: 'CallExpression[callee.name=it][arguments.0.value!=/^should/]',
+          message: '"it" should start with "should"',
+        },
+      ],
     },
   },
-);
+];
