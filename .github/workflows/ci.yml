@@ -62,7 +62,7 @@ jobs:
         run: npm run build
 
   docker-build-and-publish:
-    name: Build & Push Docker Image
+    name: Build & Publish Docker Image
     runs-on: ubuntu-latest
 
     needs: build
