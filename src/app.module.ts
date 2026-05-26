@@ -7,6 +7,9 @@ import { ChunkProducerModule } from './chunk-producer/chunk-producer.module';
 import { ChunkConsumerModule } from './chunk-consumer/chunk-consumer.module';
 import { ConfigModule } from '@nestjs/config';
 import { TraceMiddleware } from './lib/middleware/trace.middleware';
+import configuration from './lib/observability/env.config';
+
+const environment = process.env.NODE_ENV || 'development';
 @Module({
   imports: [
     OrchastratorModule,
@@ -14,6 +17,8 @@ import { TraceMiddleware } from './lib/middleware/trace.middleware';
     ChunkConsumerModule,
     MergerModule,
     ConfigModule.forRoot({
+      envFilePath: `./env/.env.${environment}`,
+      load: [configuration],
       isGlobal: true,
     }),
   ],
@@ -21,7 +26,7 @@ import { TraceMiddleware } from './lib/middleware/trace.middleware';
   providers: [AppService],
 })
 export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
+  configure(consumer: MiddlewareConsumer): void {
     consumer.apply(TraceMiddleware).forRoutes('*');
   }
 }
