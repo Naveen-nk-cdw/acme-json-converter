@@ -4,6 +4,6 @@ import { MergerService } from './merger.service';
 
 @Module({
   controllers: [MergerController],
-  providers: [MergerService]
+  providers: [MergerService],
 })
 export class MergerModule {}

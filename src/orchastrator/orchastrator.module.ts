@@ -4,6 +4,6 @@ import { OrchastratorService } from './orchastrator.service';
 
 @Module({
   controllers: [OrchastratorController],
-  providers: [OrchastratorService]
+  providers: [OrchastratorService],
 })
 export class OrchastratorModule {}

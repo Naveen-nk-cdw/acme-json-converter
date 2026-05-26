@@ -4,6 +4,6 @@ import { ChunkConsumerController } from './chunk-consumer.controller';
 
 @Module({
   providers: [ChunkConsumerService],
-  controllers: [ChunkConsumerController]
+  controllers: [ChunkConsumerController],
 })
 export class ChunkConsumerModule {}
