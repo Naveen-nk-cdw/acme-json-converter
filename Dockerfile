@@ -20,4 +20,4 @@ RUN npm run build
 EXPOSE 3000
 
 # startup command
-CMD ["node", "dist/main.js"]
+ENTRYPOINT ["node", "dist/main.js"]
