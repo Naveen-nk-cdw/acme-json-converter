@@ -18,10 +18,7 @@ export default [
   {
     ignores: ['dist', 'node_modules', 'coverage'],
   },
-  ...compat.extends(
-    'plugin:@typescript-eslint/recommended',
-    'plugin:prettier/recommended',
-  ),
+  ...compat.extends('plugin:@typescript-eslint/recommended', 'plugin:prettier/recommended'),
   {
     plugins: {
       '@typescript-eslint': tsEslintPlugin,
@@ -41,25 +38,64 @@ export default [
     },
     rules: {
       '@typescript-eslint/interface-name-prefix': 'off',
-      '@typescript-eslint/explicit-function-return-type': 'off',
+
+      '@typescript-eslint/explicit-function-return-type': 'warn',
+
       '@typescript-eslint/explicit-module-boundary-types': 'off',
-      '@typescript-eslint/no-explicit-any': 'off',
+
+      '@typescript-eslint/no-explicit-any': 'warn',
+
       'no-unused-vars': 'off',
-      '@typescript-eslint/no-unused-vars': ['error'],
+
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
+
+      'no-empty-function': 'off',
+
+      '@typescript-eslint/no-empty-function': [
+        'error',
+        {
+          allow: ['constructors'],
+        },
+      ],
+
       'require-await': 'off',
+
       '@typescript-eslint/require-await': 'error',
+
       '@typescript-eslint/no-floating-promises': 'error',
+
+      'max-len': [
+        'error',
+        {
+          code: 100,
+          tabWidth: 2,
+          ignoreUrls: true,
+          ignoreStrings: true,
+          ignoreTemplateLiterals: true,
+          ignoreComments: false,
+        },
+      ],
+
       'no-restricted-syntax': [
         'error',
+
         {
           selector:
             'CallExpression[callee.object.name=configService][callee.property.name=/^(get|getOrThrow)$/]:not(:has([arguments.1] Property[key.name=infer][value.value=true])), CallExpression[callee.object.property.name=configService][callee.property.name=/^(get|getOrThrow)$/]:not(:has([arguments.1] Property[key.name=infer][value.value=true]))',
+
           message:
             'Add "{ infer: true }" to configService.get() for correct typechecking. Example: configService.get("database.port", { infer: true })',
         },
+
         {
-          selector:
-            'CallExpression[callee.name=it][arguments.0.value!=/^should/]',
+          selector: 'CallExpression[callee.name=it][arguments.0.value!=/^should/]',
           message: '"it" should start with "should"',
         },
       ],

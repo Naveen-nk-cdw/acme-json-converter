@@ -6,8 +6,7 @@ export default {
   parserPreset: {
     parserOpts: {
       headerPattern:
-        /^([A-Z]+-\d+)\s(feat|fix|chore|docs|refactor|test|perf|ci):\s(.+)$/,
-
+        /^([A-Z]+-\d+)\s(feat|fix|chore|docs|refactor|test|add|merge|remove|perf|ci):\s(.+)$/,
       headerCorrespondence: ['ticket', 'type', 'subject'],
     },
   },
@@ -16,7 +15,7 @@ export default {
     'type-enum': [
       2,
       'always',
-      ['feat', 'fix', 'chore', 'docs', 'refactor', 'test', 'perf', 'ci'],
+      ['feat', 'fix', 'remove', 'docs', 'refactor', 'test', 'perf', 'ci', 'add', 'merge'],
     ],
 
     'type-empty': [2, 'never'],
