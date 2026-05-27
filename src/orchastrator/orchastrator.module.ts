@@ -3,7 +3,7 @@ import { OrchastratorController } from './orchastrator.controller';
 import { OrchastratorService } from './orchastrator.service';
 
 @Module({
-  controllers: [OrchastratorController],
-  providers: [OrchastratorService]
+    controllers: [OrchastratorController],
+    providers: [OrchastratorService],
 })
 export class OrchastratorModule {}
