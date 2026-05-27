@@ -1,6 +1,6 @@
 // commit msg format : ACMEJS-(TICKET NUMBER) type: msg
 
-const COMMIT_TYPES = 'feat|fix|chore|docs|refactor|test|add|merge|remove|perf|ci';
+const COMMIT_TYPES = 'feature|feat|fix|chore|docs|refactor|test|add|merge|remove|perf|ci';
 
 export default {
     extends: ['@commitlint/config-conventional'],
