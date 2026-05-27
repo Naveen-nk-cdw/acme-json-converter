@@ -4,8 +4,8 @@ import { ChunkConsumerController } from './chunk-consumer.controller';
 import { KafkaModule } from '../lib/kafka/kafka.module';
 
 @Module({
-  imports: [KafkaModule],
-  providers: [ChunkConsumerService],
-  controllers: [ChunkConsumerController],
+    imports: [KafkaModule],
+    providers: [ChunkConsumerService],
+    controllers: [ChunkConsumerController],
 })
 export class ChunkConsumerModule {}
