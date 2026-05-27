@@ -7,16 +7,16 @@ import { ChunkProducerModule } from './chunk-producer/chunk-producer.module';
 import { ChunkConsumerModule } from './chunk-consumer/chunk-consumer.module';
 import { ConfigModule } from '@nestjs/config';
 @Module({
-  imports: [
-    OrchastratorModule,
-    ChunkProducerModule,
-    ChunkConsumerModule,
-    MergerModule,
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
-  ],
-  controllers: [AppController],
-  providers: [AppService],
+    imports: [
+        OrchastratorModule,
+        ChunkProducerModule,
+        ChunkConsumerModule,
+        MergerModule,
+        ConfigModule.forRoot({
+            isGlobal: true,
+        }),
+    ],
+    controllers: [AppController],
+    providers: [AppService],
 })
 export class AppModule {}
