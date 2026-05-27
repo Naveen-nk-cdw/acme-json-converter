@@ -8,7 +8,7 @@ on:
   pull_request:
     branches:
       - '**'
-      
+
 jobs:
   test:
     name: Test
@@ -54,7 +54,7 @@ jobs:
         node-version: [24]
 
     steps:
-      - name: Download Source Code
+      - name: Download Artifact Code
         uses: actions/download-artifact@v4
         with:
           name: source-code
