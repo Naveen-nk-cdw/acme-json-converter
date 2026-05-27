@@ -2,11 +2,11 @@ import { Injectable, Inject, OnModuleInit, OnModuleDestroy } from '@nestjs/commo
 import type { Consumer } from 'kafkajs';
 import { KafkaAdminService } from '../lib/kafka/kafka-admin.service';
 /**
- * 1.Creating Kafka consumer on module startup
- * 2.Creating topics dynamically
- * 3.Subscribing to kafka topics
- * 4.Consuming and processing kafka messages
- * 5.Disconnecting consumer safely on shutdown
+ * Creating Kafka consumer on module startup
+ * Creating topics dynamically
+ * Subscribing to kafka topics
+ * Consuming and processing kafka messages
+ * Disconnecting consumer safely on shutdown
  */
 @Injectable()
 export class ChunkConsumerService implements OnModuleInit, OnModuleDestroy {
@@ -22,7 +22,7 @@ export class ChunkConsumerService implements OnModuleInit, OnModuleDestroy {
   ) {}
 
   /**
-   * Lifecycle hooks executed automatically establish connection of kafka consumer
+   * @decr Lifecycle hooks executed automatically establish connection of kafka consumer
    */
   async onModuleInit() {
     await this.consumer.connect();
@@ -30,7 +30,7 @@ export class ChunkConsumerService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
-   * Lifecycle hooks executed automatically for shutdown of kafka consumer
+   * @decr Lifecycle hooks executed automatically for shutdown of kafka consumer
    */
   async onModuleDestroy() {
     await this.consumer.disconnect();
@@ -38,7 +38,7 @@ export class ChunkConsumerService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
-   * starts kafka consumer for a given topic
+   * @decr starts kafka consumer for a given topic
    * @param topic
    * @returns
    */

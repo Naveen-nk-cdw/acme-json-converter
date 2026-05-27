@@ -1,7 +1,7 @@
 import { Kafka } from 'kafkajs';
 
 /**
- * Kafka Main Client Provider to create and expose the main Kafka client
+ * @decr Kafka Main Client Provider to create and expose the main Kafka client
  * Provider Token:'KAFKA_INSTANCE'
  */
 export const kafkaProvider = {

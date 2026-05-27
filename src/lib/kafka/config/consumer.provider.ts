@@ -1,7 +1,7 @@
 import { Kafka } from 'kafkajs';
 
 /**
- * Kafka Consumer Provider to create and expose a Kafka Consumer instance
+ * @decr Kafka Consumer Provider to create and expose a Kafka Consumer instance
  * Subscribe to Kafka topics,Read messages from partitions,Manage offsets and consumer groups
  * Provider Token:'KAFKA_CONSUMER'
  * Dependency:'KAFKA_INSTANCE'

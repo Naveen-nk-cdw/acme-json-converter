@@ -3,12 +3,12 @@ import type { Producer } from 'kafkajs';
 import { CompressionTypes } from 'kafkajs';
 import { KafkaAdminService } from '../lib/kafka/kafka-admin.service';
 /**
- * 1. Connecting Kafka producer
- * 2. Creating Kafka topics dynamically
- * 3. Serialize message payload
- * 4. Send compressed Kafka message
- * 5. Sending messages to Kafka topics
- * 6. Managing producer lifecycle
+ * Connecting Kafka producer
+ * Creating Kafka topics dynamically
+ * Serialize message payload
+ * Send compressed Kafka message
+ * Sending messages to Kafka topics
+ * Managing producer lifecycle
  */
 @Injectable()
 export class ChunkProducerService implements OnModuleDestroy, OnModuleInit {
@@ -24,7 +24,7 @@ export class ChunkProducerService implements OnModuleDestroy, OnModuleInit {
   ) {}
 
   /**
-   * Lifecycle hooks executed automatically establish connection of kafka producer
+   * @decr Lifecycle hooks executed automatically establish connection of kafka producer
    */
   async onModuleInit() {
     await this.producer.connect();
@@ -33,7 +33,7 @@ export class ChunkProducerService implements OnModuleDestroy, OnModuleInit {
   }
 
   /**
-   * Lifecycle hooks executed automatically for shutdown of kafka producer
+   * @decr Lifecycle hooks executed automatically for shutdown of kafka producer
    */
   async onModuleDestroy() {
     await this.producer.disconnect();
@@ -42,7 +42,7 @@ export class ChunkProducerService implements OnModuleDestroy, OnModuleInit {
   }
 
   /**
-   * Sends a message to Kafka topic
+   * @decr Sends a message to Kafka topic
    * Generic Type <T> Allows sending any payload structure
    * @param topic
    * @param message

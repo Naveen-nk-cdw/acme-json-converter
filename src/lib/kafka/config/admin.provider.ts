@@ -1,7 +1,7 @@
 import { Kafka } from 'kafkajs';
 
 /**
- * Kafka Admin Provider for creating topics,managing partitions ,inspecting cluster meta data
+ * @decr Kafka Admin Provider for creating topics,managing partitions ,inspecting cluster meta data
  * Provider Token:'KAFKA_ADMIN'
  * Dependency:'KAFKA_INSTANCE'
  */

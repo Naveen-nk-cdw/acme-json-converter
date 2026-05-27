@@ -1,7 +1,7 @@
 import { Kafka } from 'kafkajs';
 
 /**
- * Kafka Producer Provider to create and expose a Kafka Producer instance
+ * @decr Kafka Producer Provider to create and expose a Kafka Producer instance
  * Publish messages to Kafka topics,Handle retries automatically
  * Provider Token:'KAFKA_PRODUCER'
  * Dependency:'KAFKA_INSTANCE'

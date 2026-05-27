@@ -1,9 +1,9 @@
 import { Injectable, Inject, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import type { Admin } from 'kafkajs';
 /**
- * 1. Topic management
- * 2. Partition management
- * 3. Cluster metadata operations
+ * Topic management
+ * Partition management
+ * Cluster metadata operations
  */
 @Injectable()
 export class KafkaAdminService implements OnModuleInit, OnModuleDestroy {
@@ -14,7 +14,7 @@ export class KafkaAdminService implements OnModuleInit, OnModuleDestroy {
   constructor(@Inject('KAFKA_ADMIN') private readonly admin: Admin) {}
 
   /**
-   * Lifecycle hooks executed automatically establish connection of kafka admin
+   * @decr Lifecycle hooks executed automatically establish connection of kafka admin
    */
   async onModuleInit() {
     await this.admin.connect();
@@ -22,7 +22,7 @@ export class KafkaAdminService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
-   * Lifecycle hooks executed automatically for shutdown of kafka admin
+   * @decr Lifecycle hooks executed automatically for shutdown of kafka admin
    */
   async onModuleDestroy() {
     await this.admin.disconnect();
@@ -30,9 +30,7 @@ export class KafkaAdminService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
-   * 1. Fetch all existing topics
-   * 2. Check whether topic already exists
-   * 3. Create topic if missing
+   * @decr Fetch all existing topics and creates topic if missing
    * @param topicName
    * @returns
    */
