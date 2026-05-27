@@ -77,7 +77,7 @@ services:
 
     # db volume for persistance
     volumes:
-      - postgres_data:/var/lib/postgresql
+      - postgres_data:/var/lib/postgresql/data
 
   # kafka service
   kafka:
