@@ -11,7 +11,6 @@ async function bootstrap(): Promise<void> {
   });
   const configService = app.get(ConfigService<EnvConfig>);
   const port = configService.get<number>('app.port', { infer: true }) || 3000;
-  console.log(port);
   await app.listen(port ?? 3000);
 }
 void bootstrap();
