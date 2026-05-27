@@ -1,5 +1,5 @@
 # base image
-FROM node:20-alpine
+FROM node:24.16.0-alpine
 
 # application root directory
 WORKDIR /app
@@ -20,4 +20,5 @@ RUN npm run build
 EXPOSE 3000
 
 # startup command
-ENTRYPOINT ["node", "dist/main.js"]
+ENTRYPOINT ["npm", "run"]
+CMD ["start:prod"]

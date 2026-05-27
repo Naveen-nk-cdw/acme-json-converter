@@ -1,7 +1,7 @@
 # services
 services:
-  # backend service(nestjs application)
-  backend:
+  # backend service for dev(nestjs application)
+  backend-dev:
     build: .
 
     ports:
@@ -17,6 +17,46 @@ services:
 
       kafka:
         condition: service_healthy
+
+    profiles:
+      - dev
+
+    # develop watch
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /app
+          initial_sync: true
+          ignore:
+            - node_modules
+        - action: rebuild
+          path: package*.json
+
+    command: ['start:dev']
+
+  # backend service for prod(nestjs application)
+  backend-prod:
+    build: .
+
+    ports:
+      - '$BACKEND_PORT:3000'
+
+    # dependencies
+    depends_on:
+      postgres:
+        condition: service_started
+
+      redis:
+        condition: service_started
+
+      kafka:
+        condition: service_healthy
+
+    profiles:
+      - prod
+
+    command: ['start:prod']
 
   # db service(postgres)
   postgres:
@@ -82,7 +122,7 @@ services:
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
 
       # automatically create topic if not present
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
 
       # directory where kafka stores logs/messages/metadata
       KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
@@ -91,14 +131,7 @@ services:
       - kafka_kraft_data:/var/lib/kafka/data
 
     healthcheck:
-      test:
-        [
-          'CMD',
-          'kafka-topics',
-          '--bootstrap-server',
-          'localhost:9092',
-          '--list',
-        ]
+      test: ['CMD', 'kafka-topics', '--bootstrap-server', 'localhost:9092', '--list']
       interval: 10s
       timeout: 10s
       retries: 10
