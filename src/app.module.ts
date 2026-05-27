@@ -17,7 +17,7 @@ const environment = process.env.NODE_ENV || 'development';
     ChunkConsumerModule,
     MergerModule,
     ConfigModule.forRoot({
-      envFilePath: `./env/.env.${environment}`,
+      envFilePath: `.env.${environment}`,
       load: [configuration],
       isGlobal: true,
     }),

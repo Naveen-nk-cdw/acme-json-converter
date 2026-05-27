@@ -6,7 +6,7 @@ import { traceStorage } from '../observability/logger.config';
 @Injectable()
 export class TraceMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
-    const traceId = (req.headers['x-trace-id'] as string) || uuid4();
+    const traceId = uuid4();
     res.setHeader('x-trace-id', traceId);
     const store = new Map();
     store.set('traceId', traceId);

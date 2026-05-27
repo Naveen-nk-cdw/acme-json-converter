@@ -1,41 +1,61 @@
 import { AsyncLocalStorage } from 'async_hooks';
 import { format, transports } from 'winston';
 import 'winston-daily-rotate-file';
+import { LOGGER_CONSTANTS } from '../common/constants/logger.constants';
+
 export const traceStorage = new AsyncLocalStorage<Map<string, string>>();
+
+const currentLogLevel =
+  process.env.NODE_ENV === 'production'
+    ? LOGGER_CONSTANTS.LEVELS.PRODUCTION
+    : LOGGER_CONSTANTS.LEVELS.DEVELOPMENT;
+
 const customFormat = format.printf(({ timestamp, level, message, context }) => {
   const store = traceStorage.getStore();
-  const traceId = store?.get('traceId') || 'NO-TRACE';
+  const traceId = store?.get(LOGGER_CONSTANTS.TRACE.KEY) || LOGGER_CONSTANTS.TRACE.DEFAULT_ID;
   const ctx = context ? ` [${context}]` : '';
+
   return `${timestamp} [${traceId}]${ctx} ${level.toUpperCase()}:${message}`;
 });
 
 export const winstonConfig = {
   transports: [
+    // Console Transport
     new transports.Console({
+      level: currentLogLevel,
       format: format.combine(
-        format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+        format.timestamp({ format: LOGGER_CONSTANTS.FORMAT.TIMESTAMP }),
         customFormat,
         format.colorize({ all: true }),
       ),
-      level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
     }),
+
+    // Combined Logs Transport
     new transports.DailyRotateFile({
-      filename: 'logs/%DATE%.log',
-      datePattern: 'YYYY-MM-DD',
+      level: currentLogLevel,
+      filename: LOGGER_CONSTANTS.FILES.COMBINED_NAME,
+      datePattern: LOGGER_CONSTANTS.FORMAT.DATE_PATTERN,
       zippedArchive: true,
-      maxSize: '20m',
-      maxFiles: '14d',
-      format: format.combine(format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), customFormat),
-      level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+      maxSize: LOGGER_CONSTANTS.FILES.MAX_SIZE,
+      maxFiles: LOGGER_CONSTANTS.FILES.MAX_FILES_COMBINED,
+      format: format.combine(
+        format.timestamp({ format: LOGGER_CONSTANTS.FORMAT.TIMESTAMP }),
+        customFormat,
+      ),
     }),
+
+    // Error Logs Transport
     new transports.DailyRotateFile({
-      filename: 'logs/error-%DATE%.log',
-      datePattern: 'YYYY-MM-DD',
+      level: LOGGER_CONSTANTS.LEVELS.ERROR,
+      filename: LOGGER_CONSTANTS.FILES.ERROR_NAME,
+      datePattern: LOGGER_CONSTANTS.FORMAT.DATE_PATTERN,
       zippedArchive: true,
-      maxSize: '20m',
-      maxFiles: '30d',
-      level: 'error',
-      format: format.combine(format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), customFormat),
+      maxSize: LOGGER_CONSTANTS.FILES.MAX_SIZE,
+      maxFiles: LOGGER_CONSTANTS.FILES.MAX_FILES_ERROR,
+      format: format.combine(
+        format.timestamp({ format: LOGGER_CONSTANTS.FORMAT.TIMESTAMP }),
+        customFormat,
+      ),
     }),
   ],
 };
