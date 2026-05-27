@@ -1,8 +1,16 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { WinstonModule } from 'nest-winston';
+import { winstonConfig } from './lib/observability/logger.config';
+import { ConfigService } from '@nestjs/config';
+import { EnvConfig } from './lib/observability/env.config';
 
-async function bootstrap() {
-    const app = await NestFactory.create(AppModule);
-    await app.listen(process.env.PORT ?? 3000);
+async function bootstrap(): Promise<void> {
+  const app = await NestFactory.create(AppModule, {
+    logger: WinstonModule.createLogger(winstonConfig),
+  });
+  const configService = app.get(ConfigService<EnvConfig>);
+  const port = configService.get<number>('app.port', { infer: true }) || 3000;
+  await app.listen(port ?? 3000);
 }
 void bootstrap();
