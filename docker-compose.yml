@@ -1,0 +1,163 @@
+# services
+services:
+    # backend service for dev(nestjs application)
+    backend-dev:
+        build: .
+
+        ports:
+            - '$BACKEND_PORT:3000'
+
+        # dependencies
+        depends_on:
+            postgres:
+                condition: service_started
+
+            redis:
+                condition: service_started
+
+            kafka:
+                condition: service_healthy
+
+        volumes:
+            - ./src/lib/data/postgres:/app/src/lib/data/postgres # just mount postgres data folder as volume, to sync
+
+        profiles:
+            - dev
+
+        # develop watch
+        develop:
+            watch:
+                - action: sync
+                  path: .
+                  target: /app
+                  initial_sync: true
+                  ignore:
+                      - node_modules
+                      - src/lib/data/postgres/seed.sql # to avoid infinite sync on backup
+                - action: rebuild
+                  path: package*.json
+
+        command: ['start:dev']
+
+    # backend service for prod(nestjs application)
+    backend-prod:
+        build: .
+
+        ports:
+            - '$BACKEND_PORT:3000'
+
+        # dependencies
+        depends_on:
+            postgres:
+                condition: service_started
+
+            redis:
+                condition: service_started
+
+            kafka:
+                condition: service_healthy
+
+        volumes:
+            - ./src/lib/data/postgres:/app/src/lib/data/postgres # just mount postgres data folder as volume, to sync
+
+        profiles:
+            - prod
+
+        command: ['start:prod']
+
+    # db service(postgres)
+    postgres:
+        image: postgres:15
+
+        environment:
+            # the user postgres creates on startup(default: postgres)
+            POSTGRES_USER: $POSTGRES_USER
+
+            # password for the created postgres user(required)
+            POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+
+            # database automatically created on startup(default: postgres)
+            POSTGRES_DB: $POSTGRES_DB
+
+        ports:
+            - '$POSTGRES_PORT:5432'
+
+        # db volume for persistance
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+
+    # kafka service
+    kafka:
+        image: confluentinc/cp-kafka:7.6.0
+
+        ports:
+            - '$KAFKA_PORT:9092'
+
+        environment:
+            # allow kafka to use kraft instead of zookeeper
+            KAFKA_KRAFT_MODE: 'true'
+
+            # kafka cluster id, which all brokers and controllers share(mandatory)
+            CLUSTER_ID: $KAFKA_CLUSTER_ID
+
+            # unique id of this kafka node/broker(required)
+            KAFKA_NODE_ID: 1
+
+            # this container acts as both broker and controller(required in kraft mode)
+            KAFKA_PROCESS_ROLES: broker, controller
+
+            # controller quorum members format -> nodeId@host:port(required in kraft mode)
+            KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+
+            # replication factor for internal kafka offset topic(default 3, with 3 clusters)
+            KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+            # kafka listeners:
+            # PLAINTEXT  -> producer/consumer/client traffic
+            # CONTROLLER -> kafka controller communication
+            KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092, CONTROLLER://0.0.0.0:9093
+
+            # map listener names -> security protocol
+            # both use plaintext(no ssl/authentication)
+            KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT, CONTROLLER:PLAINTEXT
+
+            # address kafka gives back to clients for connections
+            # inside docker network, service name acts as hostname
+            KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+
+            # listener name used for controller communication(required if using kraft mode)
+            KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+
+            # automatically create topic if not present
+            KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+
+            # directory where kafka stores logs/messages/metadata
+            KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+
+        volumes:
+            - kafka_kraft_data:/var/lib/kafka/data
+
+        healthcheck:
+            test: ['CMD', 'kafka-topics', '--bootstrap-server', 'localhost:9092', '--list']
+            interval: 10s
+            timeout: 10s
+            retries: 10
+
+    # cache service(redis)
+    redis:
+        image: redis:7
+
+        # startup command, that adds password authentication
+        command: redis-server --requirepass $REDIS_PASSWORD
+
+        ports:
+            - '$REDIS_PORT:6379'
+
+        volumes:
+            - redis_data:/data
+
+# persistance volumes
+volumes:
+    postgres_data:
+    redis_data:
+    kafka_kraft_data:

@@ -1,0 +1,309 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/lib/common/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model chunk_outputs {
+  chunk_output_id   String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  run_id            String?             @db.Uuid
+  chunk_id          String?             @db.Uuid
+  output_type       etl_output_type?
+  file_name         String?             @db.VarChar(500)
+  s3_key            String?             @db.VarChar(1000)
+  file_size_bytes   BigInt?
+  checksum          String?             @db.VarChar(128)
+  record_count      Int?
+  output_status     etl_output_status?
+  schema_version    String?             @db.VarChar(50)
+  generated_at      DateTime?           @db.Timestamptz(6)
+  created_at        DateTime?           @db.Timestamptz(6)
+  updated_at        DateTime?           @db.Timestamptz(6)
+  metadata          Json?
+  etl_chunks        etl_chunks?         @relation(fields: [chunk_id], references: [chunk_id], onDelete: NoAction, onUpdate: NoAction)
+  etl_runs          etl_runs?           @relation(fields: [run_id], references: [run_id], onDelete: NoAction, onUpdate: NoAction)
+  processing_errors processing_errors[]
+}
+
+model consolidated_outputs {
+  consolidated_output_id String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  run_id                 String?                   @db.Uuid
+  output_level           etl_output_level?
+  output_type            etl_output_type?
+  file_name              String?                   @db.VarChar(500)
+  s3_key                 String?                   @db.VarChar(1000)
+  file_size_bytes        BigInt?
+  checksum               String?                   @db.VarChar(128)
+  input_file_count       Int?
+  record_count           BigInt?
+  consolidation_status   etl_consolidation_status?
+  generated_at           DateTime?                 @db.Timestamptz(6)
+  created_at             DateTime?                 @db.Timestamptz(6)
+  updated_at             DateTime?                 @db.Timestamptz(6)
+  metadata               Json?
+  etl_runs               etl_runs?                 @relation(fields: [run_id], references: [run_id], onDelete: NoAction, onUpdate: NoAction)
+  processing_errors      processing_errors[]
+  validation_reports     validation_reports[]
+}
+
+model etl_chunks {
+  chunk_id                String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  run_id                  String?              @db.Uuid
+  chunk_sequence          Int?
+  chunk_file_name         String?              @db.VarChar(500)
+  chunk_s3_key            String?              @db.VarChar(1000)
+  chunk_size_bytes        BigInt?
+  chunk_checksum          String?              @db.VarChar(128)
+  record_start_index      BigInt?
+  record_end_index        BigInt?
+  record_count            Int?
+  chunk_status            etl_chunk_status?
+  processing_stage        etl_chunk_stage?
+  retry_count             Int?
+  worker_id               String?              @db.VarChar(200)
+  kafka_partition         Int?
+  kafka_offset            BigInt?
+  last_error_code         String?              @db.VarChar(100)
+  last_error_message      String?
+  processing_started_at   DateTime?            @db.Timestamptz(6)
+  processing_completed_at DateTime?            @db.Timestamptz(6)
+  created_at              DateTime?            @db.Timestamptz(6)
+  updated_at              DateTime?            @db.Timestamptz(6)
+  metadata                Json?
+  chunk_outputs           chunk_outputs[]
+  etl_runs                etl_runs?            @relation(fields: [run_id], references: [run_id], onDelete: NoAction, onUpdate: NoAction)
+  processing_errors       processing_errors[]
+  run_events              run_events[]
+  validation_reports      validation_reports[]
+}
+
+model etl_runs {
+  run_id                 String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  run_name               String?                @db.VarChar(200)
+  source_file_name       String?                @db.VarChar(500)
+  source_file_s3_key     String?                @db.VarChar(1000)
+  source_file_size_bytes BigInt?
+  source_file_checksum   String?                @db.VarChar(128)
+  mapping_config_id      String?                @db.Uuid
+  run_status             etl_run_status?
+  run_stage              etl_run_stage?
+  total_chunks           Int?
+  processed_chunks       Int?
+  failed_chunks          Int?
+  retried_chunks         Int?
+  total_input_records    BigInt?
+  valid_input_records    BigInt?
+  invalid_input_records  BigInt?
+  final_output_s3_key    String?                @db.VarChar(1000)
+  final_output_checksum  String?                @db.VarChar(128)
+  requested_by           String?                @db.VarChar(200)
+  trigger_type           etl_trigger_type?
+  started_at             DateTime?              @db.Timestamptz(6)
+  completed_at           DateTime?              @db.Timestamptz(6)
+  created_at             DateTime?              @db.Timestamptz(6)
+  updated_at             DateTime?              @db.Timestamptz(6)
+  metadata               Json?
+  chunk_outputs          chunk_outputs[]
+  consolidated_outputs   consolidated_outputs[]
+  etl_chunks             etl_chunks[]
+  mapping_configs        mapping_configs?       @relation(fields: [mapping_config_id], references: [mapping_config_id], onDelete: NoAction, onUpdate: NoAction)
+  idempotency_keys       idempotency_keys[]
+  processing_errors      processing_errors[]
+  run_events             run_events[]
+  run_lookup_usage       run_lookup_usage[]
+  validation_reports     validation_reports[]
+}
+
+model idempotency_keys {
+  idempotency_key   String                  @id @db.VarChar(255)
+  entity_type       String?                 @db.VarChar(50)
+  entity_id         String?                 @db.VarChar(255)
+  run_id            String?                 @db.Uuid
+  processing_status etl_idempotency_status?
+  response_payload  Json?
+  created_at        DateTime?               @db.Timestamptz(6)
+  expires_at        DateTime?               @db.Timestamptz(6)
+  etl_runs          etl_runs?               @relation(fields: [run_id], references: [run_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model lookup_datasets {
+  lookup_dataset_id String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  lookup_name       String?                 @db.VarChar(200)
+  lookup_version    String?                 @db.VarChar(100)
+  source_type       etl_lookup_source_type?
+  source_location   String?                 @db.VarChar(1000)
+  checksum          String?                 @db.VarChar(128)
+  is_active         Boolean?
+  created_at        DateTime?               @db.Timestamptz(6)
+  updated_at        DateTime?               @db.Timestamptz(6)
+  run_lookup_usage  run_lookup_usage[]
+}
+
+model mapping_configs {
+  mapping_config_id    String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  config_name          String?    @db.VarChar(200)
+  config_version       Int?
+  source_format        String?    @db.VarChar(50)
+  target_format        String?    @db.VarChar(50)
+  is_active            Boolean?
+  is_default           Boolean?
+  product_mapping      Json?
+  category_mapping     Json?
+  category_map_mapping Json?
+  validation_rules     Json?
+  transformation_rules Json?
+  lookup_config        Json?
+  description          String?
+  created_by           String?    @db.VarChar(200)
+  created_at           DateTime?  @db.Timestamptz(6)
+  updated_at           DateTime?  @db.Timestamptz(6)
+  etl_runs             etl_runs[]
+}
+
+model processing_errors {
+  error_id               String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  run_id                 String?               @db.Uuid
+  chunk_id               String?               @db.Uuid
+  chunk_output_id        String?               @db.Uuid
+  consolidated_output_id String?               @db.Uuid
+  error_stage            String?               @db.VarChar(50)
+  error_code             String?               @db.VarChar(100)
+  error_message          String?
+  error_details          Json?
+  is_retryable           Boolean?
+  occurrence_count       Int?
+  first_occurred_at      DateTime?             @db.Timestamptz(6)
+  last_occurred_at       DateTime?             @db.Timestamptz(6)
+  created_at             DateTime?             @db.Timestamptz(6)
+  etl_chunks             etl_chunks?           @relation(fields: [chunk_id], references: [chunk_id], onDelete: NoAction, onUpdate: NoAction)
+  chunk_outputs          chunk_outputs?        @relation(fields: [chunk_output_id], references: [chunk_output_id], onDelete: NoAction, onUpdate: NoAction)
+  consolidated_outputs   consolidated_outputs? @relation(fields: [consolidated_output_id], references: [consolidated_output_id], onDelete: NoAction, onUpdate: NoAction)
+  etl_runs               etl_runs?             @relation(fields: [run_id], references: [run_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model run_events {
+  event_id      String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  run_id        String?     @db.Uuid
+  chunk_id      String?     @db.Uuid
+  event_type    String?     @db.VarChar(100)
+  event_status  String?     @db.VarChar(50)
+  event_message String?
+  event_payload Json?
+  created_at    DateTime?   @db.Timestamptz(6)
+  etl_chunks    etl_chunks? @relation(fields: [chunk_id], references: [chunk_id], onDelete: NoAction, onUpdate: NoAction)
+  etl_runs      etl_runs?   @relation(fields: [run_id], references: [run_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model run_lookup_usage {
+  run_id            String          @db.Uuid
+  lookup_dataset_id String          @db.Uuid
+  lookup_datasets   lookup_datasets @relation(fields: [lookup_dataset_id], references: [lookup_dataset_id], onDelete: NoAction, onUpdate: NoAction)
+  etl_runs          etl_runs        @relation(fields: [run_id], references: [run_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([run_id, lookup_dataset_id])
+}
+
+model validation_reports {
+  validation_report_id   String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  run_id                 String?                @db.Uuid
+  consolidated_output_id String?                @db.Uuid
+  chunk_id               String?                @db.Uuid
+  validation_level       etl_validation_level?
+  validated_object_type  etl_output_type?
+  validated_object_path  String?                @db.VarChar(1000)
+  validation_status      etl_validation_status?
+  total_rules_checked    Int?
+  total_errors           Int?
+  total_warnings         Int?
+  report_s3_key          String?                @db.VarChar(1000)
+  summary                Json?
+  errors_json            Json?
+  validated_at           DateTime?              @db.Timestamptz(6)
+  created_at             DateTime?              @db.Timestamptz(6)
+  etl_chunks             etl_chunks?            @relation(fields: [chunk_id], references: [chunk_id], onDelete: NoAction, onUpdate: NoAction)
+  consolidated_outputs   consolidated_outputs?  @relation(fields: [consolidated_output_id], references: [consolidated_output_id], onDelete: NoAction, onUpdate: NoAction)
+  etl_runs               etl_runs?              @relation(fields: [run_id], references: [run_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+enum etl_chunk_stage {
+  read
+  process
+  write
+}
+
+enum etl_chunk_status {
+  pending
+  processed
+  failed
+}
+
+enum etl_consolidation_status {
+  inserted
+  updated
+  unchanged
+}
+
+enum etl_idempotency_status {
+  clean_run
+  reprocessed
+  overwritten
+}
+
+enum etl_lookup_source_type {
+  in_memory
+  database
+  file
+}
+
+enum etl_output_level {
+  error
+  info
+  debug
+}
+
+enum etl_output_status {
+  success
+  failed
+  skipped
+}
+
+enum etl_output_type {
+  database
+  file
+  api_stream
+}
+
+enum etl_run_stage {
+  extract
+  stage
+  transform
+  load
+}
+
+enum etl_run_status {
+  pending
+  running_success @map("running,success")
+  failed
+}
+
+enum etl_trigger_type {
+  scheduled
+  event_based
+  manual
+}
+
+enum etl_validation_level {
+  none
+  warn
+  strict
+}
+
+enum etl_validation_status {
+  valid
+  invalid
+  partial
+}
